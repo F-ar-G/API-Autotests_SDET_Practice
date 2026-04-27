@@ -1,0 +1,51 @@
+name: API Tests
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout test repo
+        uses: actions/checkout@v4
+
+      - name: Checkout backend repo
+        uses: actions/checkout@v4
+        with:
+          repository: sun6r0/test-service
+          path: backend
+
+      - name: Copy migrations
+        run: cp -r backend/migrations ./migrations
+
+      - name: Build backend image
+        run: docker build -t api-service backend/
+
+      - name: Start services
+        env:
+          SERVICE_IMAGE: api-service
+        run: docker compose up -d --wait
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest -v
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results/
+          retention-days: 7
