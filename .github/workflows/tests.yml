@@ -29,7 +29,15 @@ jobs:
       - name: Start services
         env:
           SERVICE_IMAGE: api-service
-        run: docker compose up -d --wait
+        run: docker compose up -d
+
+      - name: Wait for service
+        run: |
+          echo "Waiting for service..."
+          until curl -sf http://localhost:8080/api/getAll; do
+            sleep 2
+          done
+          echo "Service is ready"
 
       - name: Set up Python
         uses: actions/setup-python@v5
