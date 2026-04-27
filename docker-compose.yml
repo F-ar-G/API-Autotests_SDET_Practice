@@ -22,7 +22,6 @@ services:
       - "-path=/migrations"
       - "-database=postgres://test:test@postgres:5432/test?sslmode=disable"
       - "up"
-      - "3"
 
   service:
     image: ${SERVICE_IMAGE}
